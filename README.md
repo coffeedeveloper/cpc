@@ -2,7 +2,36 @@
 
 快速搜索并复制开发上下文。Go 编写的单文件 CLI，支持 macOS 和 Linux，界面可切换中文或英文，并提前显示可复制的实际内容。
 
-## 本地使用
+## Homebrew 安装（推荐）
+
+macOS 和 Linux 用户可以通过 Homebrew 安装稳定版：
+
+```sh
+brew tap coffeedeveloper/cpc https://github.com/coffeedeveloper/cpc.git
+brew install coffeedeveloper/cpc/cpc
+```
+
+安装后直接运行：
+
+```sh
+cpc --version
+cpc
+```
+
+更新到最新稳定版：
+
+```sh
+brew update
+brew upgrade coffeedeveloper/cpc/cpc
+```
+
+本仓库同时作为 Homebrew tap，首次添加需传入完整仓库 URL。Homebrew 会自动安装构建所需的 Go，校验源码 SHA-256，并编译安装 `cpc`，无需手动配置 Go 环境。
+
+如需安装 main 分支的开发版，可使用 `brew install --HEAD coffeedeveloper/cpc/cpc`。已安装 HEAD 的用户切换稳定版时，先执行 `brew uninstall cpc`，再执行上述稳定版安装命令。
+
+无需 Homebrew 的用户也可从 [GitHub Releases](https://github.com/coffeedeveloper/cpc/releases/latest) 下载 macOS/Linux 的 arm64/amd64 二进制，并使用同次发布的 `checksums.txt` 校验。
+
+## 从源码构建
 
 需要 Go 1.24 或更新版本：
 
@@ -108,39 +137,18 @@ language = "auto" # auto、zh 或 en
 
 菜单在独立终端屏幕中显示，退出后恢复原屏幕。每行根据窗口宽度截断长内容，支持窗口缩放和列表滚动；底部显示当前选项的简介。缩略仅影响显示，复制值保持完整。菜单会话复用已经加载的数据，退出时取消未完成的网络请求。
 
-## Homebrew 安装与更新
-
-首次稳定版发布成功后：
-
-```sh
-brew tap coffeedeveloper/cpc https://github.com/coffeedeveloper/cpc.git
-brew install coffeedeveloper/cpc/cpc
-
-# 后续更新
-brew update
-brew upgrade coffeedeveloper/cpc/cpc
-```
-
-本项目直接作为 tap 使用，因此第一次 `brew tap` 必须传入仓库 URL，不需要另建 `homebrew-cpc` 仓库。Formula 从带 SHA-256 校验的版本源码构建，Homebrew 会安装构建所需的 Go。首个版本发布前（代码已推送到 main 后）可用：
-
-```sh
-brew tap coffeedeveloper/cpc https://github.com/coffeedeveloper/cpc.git
-brew install --HEAD coffeedeveloper/cpc/cpc
-```
-
-从 HEAD 切换到稳定版时先 `brew uninstall cpc`，再执行上面的稳定版安装命令。也可从 GitHub Releases 下载 macOS/Linux、arm64/amd64 二进制压缩包，使用同次发布的 `checksums.txt` 验证。
-
 ## 发布维护
 
-仓库已包含 CI、GoReleaser 配置和发布 workflow，但创建本地工程不会自动发布远端版本。
+仓库已包含 CI、GoReleaser 配置和发布 workflow。推送新的版本 tag 会触发发布。
 
 1. 将代码提交并推送至 `coffeedeveloper/cpc` 的 `main` 分支。
 2. 确认 GitHub Actions 已启用，仓库允许 workflow 的 `contents: write` 权限。如果 main 有分支保护，需要允许发布机器人提交 Formula 更新，或手动执行下面的 Formula 更新步骤并走 PR。
 3. 在通过 CI 的提交上创建版本 tag 并推送：
 
 ```sh
-git tag v0.1.0
-git push origin v0.1.0
+# 版本号需使用尚未发布的新版本，例如 v0.1.1
+git tag -a v0.1.1 -m "Release v0.1.1"
+git push origin v0.1.1
 ```
 
 Release workflow 会执行测试、构建四个平台的二进制、创建 GitHub Release，并将稳定版源码 URL 与真实 SHA-256 更新到 `main` 的 `Formula/cpc.rb`。使用同仓库 `GITHUB_TOKEN`，无需跨仓库 PAT。后续版本重复推送新 tag 即可。预发布 tag（如 `v0.2.0-rc.1`）不会更新稳定 Formula；较旧版本也不会回退 Formula。

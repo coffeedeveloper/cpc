@@ -1,0 +1,30 @@
+version: 2
+project_name: cpc
+builds:
+  - main: ./cmd/cpc
+    binary: cpc
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - LICENSE
+checksum:
+  name_template: checksums.txt
+changelog:
+  sort: asc
+release:
+  github:
+    owner: coffeedeveloper
+    name: cpc
+  prerelease: auto

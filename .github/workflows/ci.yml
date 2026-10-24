@@ -1,0 +1,33 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: test -z "$(gofmt -l cmd internal)"
+      - run: go test -race ./...
+      - run: go vet ./...
+      - run: go build ./cmd/cpc
+      - run: ./cpc --print pwd
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python -m pip install pyte==0.8.2
+      - run: make build
+      - run: python scripts/test_terminal.py
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          version: '~> v2'
+          args: check
